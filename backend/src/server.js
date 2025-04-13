@@ -1,21 +1,28 @@
-// src/server.js
+// backend/src/server.js
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const db = require('./db');
+const urlRoutes = require('./routes/urlRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 3000; // Use environment variable or default
+const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors()); // Allow requests from your Vue frontend (configure origins later for security)
-app.use(express.json()); // Parse JSON request bodies
+app.use(cors());
+app.use(express.json());
 
-// Basic Route (Test)
+// API routes
+app.use('/api/urls', urlRoutes.router);
+
+// Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'UP', message: 'Backend is running!' });
 });
 
-// TODO: Add routes for URL shortening, redirection, history, QR codes
+// Redirect handler for the root path using short codes
+app.get('/:shortCode', urlRoutes.handleRedirect);
 
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
