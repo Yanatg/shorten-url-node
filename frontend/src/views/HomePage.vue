@@ -3,8 +3,6 @@
   <div>
     <UrlShortener />
     <HistoryList v-if="authStore.isLoggedIn && authStore.initialCheckDone" class="mt-12"/>
-    <HistoryList v-if="authStore.isLoggedIn && authStore.initialCheckDone"/>
-
     <div v-else-if="!authStore.isLoggedIn && authStore.initialCheckDone" class="text-center mt-12 p-6 bg-blue-50 border border-blue-200 rounded-lg">
         <p class="text-gray-600">
             <router-link :to="{ name: 'Login' }" class="text-blue-600 font-semibold hover:underline">Log in</router-link> or
