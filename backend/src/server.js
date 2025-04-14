@@ -10,6 +10,8 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.set('trust proxy', 1);
+
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 app.use(cors({
