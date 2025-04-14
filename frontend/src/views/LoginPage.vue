@@ -1,5 +1,5 @@
 <template>
-    <div class="max-w-md mx-auto mt-10 p-8 bg-white rounded-lg shadow-xl border border-gray-200">
+    <div class="max-w-md mx-auto mt-10 p-8 bg-white rounded-lg shadow-xl border border-gray-200 text-start">
       <h2 class="text-2xl font-semibold text-center mb-6 text-gray-700">Login</h2>
   
       <form @submit.prevent="handleLogin">

@@ -1,11 +1,11 @@
 <template>
-  <div id="app" class="min-w-[900px] container mx-auto px-4 py-8 min-h-screen flex flex-col">
+  <div id="app" class="min-w-[1122px] container mx-auto px-4 py-8 min-h-screen flex flex-col">
 
     <header class="mb-10 border-b border-gray-200 pb-4">
       <nav class="flex flex-wrap items-center justify-between gap-4">
         <router-link :to="{ name: 'Home' }" class="flex-shrink-0">
           <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 inline-block hover:text-blue-700 transition-colors">
-            My Short URL Service
+            Short URL Service
           </h1>
         </router-link>
 
