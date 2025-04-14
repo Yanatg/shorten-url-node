@@ -151,11 +151,6 @@ const showQrModal = ref(false);
 const qrCodeUrl = ref("");
 
 const historyForLoop = computed(() => {
-  console.log(
-    `>>> STEP 4: HistoryList computed running. Store history length: ${
-      urlStore.history?.length ?? "undefined"
-    }`
-  );
   return urlStore.history;
 });
 

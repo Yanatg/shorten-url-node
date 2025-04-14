@@ -139,7 +139,6 @@ const createShortUrl = async () => {
     }
 
     if (creationSuccess && authStore.isLoggedIn) {
-        console.log('>>> STEP 1: UrlShortener requesting history refresh <<<');
         try {
             await urlStore.fetchHistory();
         } catch (fetchErr) {
