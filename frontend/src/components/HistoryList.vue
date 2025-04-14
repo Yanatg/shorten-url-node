@@ -135,10 +135,17 @@
 <script setup>
 // Added computed
 import { ref, onMounted, watch, computed } from "vue";
-// Removed axios import - store handles it
+import axios from 'axios'; // <-- ***** ADD THIS LINE BACK *****
+// Removed axios import - store handles it // You can remove this comment now
 import { useAuthStore } from "../stores/auth";
-import { useUrlStore } from "../stores/url"; // <-- Import the URL store
+import { useUrlStore } from "../stores/url";
 import QrCodeModal from "./QrCodeModal.vue";
+
+// This line needs the 'axios' import from above
+const apiClient = axios.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+    withCredentials: true
+});
 
 const authStore = useAuthStore();
 const urlStore = useUrlStore(); // <-- Get URL store instance
