@@ -1,4 +1,4 @@
-// backend/src/server.js OR backend/src/routes/urlRoutes.js
+// backend/src/routes/urlRoutes.js
 
 const express = require('express');
 const router = express.Router();
@@ -47,7 +47,7 @@ router.post('/', async (req, res) => {
   }
 
   const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
-  const fullShortUrl = `<span class="math-inline">\{baseUrl\}/</span>{insertedUrl.short_code}`;
+  const fullShortUrl = `${baseUrl}/${insertedUrl.short_code}`;
 
   res.status(201).json({
     id: insertedUrl.id,

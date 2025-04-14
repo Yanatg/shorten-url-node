@@ -1,0 +1,9 @@
+/* frontend/src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional: Add global base styles here if needed */
+body {
+  @apply bg-gray-100; /* Example: Set a default background */
+}
