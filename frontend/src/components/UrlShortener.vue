@@ -80,17 +80,16 @@
 
 <script setup>
 import { ref } from "vue";
-import axios from "axios"; // Make sure axios is installed (npm install axios)
+import axios from "axios";
 
 // Reactive variables for component state
-const originalUrl = ref(""); // Input field model
-const shortUrlResult = ref(null); // Stores the successful API response object { id, short_code, original_url, full_short_url }
-const isLoading = ref(false); // Tracks loading state for button/UI feedback
-const error = ref(null); // Stores error messages for display
-const copySuccess = ref(false); // Flag for showing "Copied!" message
+const originalUrl = ref("");
+const shortUrlResult = ref(null);
+const isLoading = ref(false);
+const error = ref(null);
+const copySuccess = ref(false);
 
-// Get API base URL from environment variables (defined in frontend/.env)
-// Fallback to localhost:3000/api for local development if not set
+
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
 
@@ -147,16 +146,15 @@ const copyToClipboard = (text) => {
   navigator.clipboard
     .writeText(text)
     .then(() => {
-      copySuccess.value = true; // Show success message
-      // Hide the success message after a short duration
+      copySuccess.value = true; 
       setTimeout(() => {
         copySuccess.value = false;
-      }, 2500); // Hide after 2.5 seconds
+      }, 2500);
     })
     .catch((err) => {
       console.error("Failed to copy text: ", err);
-      error.value = "Failed to copy URL to clipboard."; // Show copy error
-      copySuccess.value = false; // Ensure success message is hidden on error
+      error.value = "Failed to copy URL to clipboard.";
+      copySuccess.value = false;
     });
 };
 </script>

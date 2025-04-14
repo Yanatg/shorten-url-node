@@ -6,19 +6,9 @@
     <main>
       <UrlShortener />
       </main>
-     <footer class="text-center mt-16 text-gray-500 text-sm">
-        Short URL Service &copy; {{ new Date().getFullYear() }}
-     </footer>
   </div>
 </template>
 
 <script setup>
 import UrlShortener from './components/UrlShortener.vue';
-// TODO: Import History component when created
 </script>
-
-<style>
-/* Keep global non-Tailwind styles minimal, prefer Tailwind utilities */
-/* Example: If you needed a specific font not easily handled by Tailwind config */
-/* body { font-family: 'Your Custom Font', sans-serif; } */
-</style>
