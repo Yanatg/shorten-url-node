@@ -1,5 +1,5 @@
 <template>
-  <div class="min-w-[700px] mx-auto p-6 bg-white rounded-lg shadow-lg">
+  <div class="mx-auto p-6 bg-white rounded-lg shadow-lg">
     <h2 class="text-2xl font-semibold text-center mb-6 text-gray-700">
       Create Short URL
     </h2>
@@ -58,14 +58,14 @@
           >
             Copy URL
           </button>
+          <button
+            @click="openQrModal(shortUrlResult.full_short_url)"
+            title="Show QR Code"
+            class="px-2 py-1 text-xs bg-indigo-500 text-white rounded hover:bg-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition duration-150 ease-in-out"
+          >
+            Show QR
+          </button>
         </div>
-      </div>
-
-      <div class="text-sm">
-        <span class="font-medium text-gray-600">Short Code:</span>
-        <span class="text-gray-800 font-mono bg-gray-200 px-1 py-0.5 rounded">{{
-          shortUrlResult.short_code
-        }}</span>
       </div>
 
       <p
@@ -75,81 +75,116 @@
       >
         Copied to clipboard!
       </p>
-
-      <div class="mt-4 pt-4 border-t border-gray-200">
-          <span class="font-medium text-gray-600 text-sm">QR Code:</span>
-          <div class="mt-2 flex justify-center">
-              <qrcode-vue
-                  v-if="shortUrlResult.full_short_url" :value="shortUrlResult.full_short_url"
-                  :size="150" level="H" render-as="svg" />
-              <p v-else class="text-xs text-gray-500">Cannot generate QR code.</p>
-          </div>
-      </div>
-      </div> </div> </template>
+    </div>
+    <QrCodeModal
+      v-if="showQrModal"
+      :url="qrCodeUrl"
+      @close="showQrModal = false"
+    />
+  </div>
+</template>
 
 <script setup>
 import { ref } from "vue";
 import axios from "axios";
-import QrcodeVue from 'qrcode.vue'; // Keep this import
+import QrcodeVue from 'qrcode.vue'; // Keep this (needed by modal)
+import QrCodeModal from './QrCodeModal.vue';
+import { useUrlStore } from '../stores/url'; // <-- 1. IMPORT URL STORE
+import { useAuthStore } from '../stores/auth'; // <-- 2. IMPORT AUTH STORE
 
-// Reactive variables for component state (keep these)
+// --- State Variables ---
 const originalUrl = ref("");
 const shortUrlResult = ref(null);
 const isLoading = ref(false);
 const error = ref(null);
 const copySuccess = ref(false);
+const showQrModal = ref(false);
+const qrCodeUrl = ref('');
 
-// API Base URL (keep this)
+// --- Store Instances ---
+const urlStore = useUrlStore(); // <-- 3. USE URL STORE
+const authStore = useAuthStore(); // <-- 4. USE AUTH STORE
+
+// API Base URL
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
 
-// createShortUrl function (keep this)
-const createShortUrl = async () => {
-  isLoading.value = true;
-  error.value = null;
-  shortUrlResult.value = null;
-  copySuccess.value = false;
+// --- Methods ---
 
-  try {
-    const response = await axios.post(`${API_BASE_URL}/urls`, {
-      original_url: originalUrl.value,
-    });
-    shortUrlResult.value = response.data;
-  } catch (err) {
-    console.error("Error creating short URL:", err);
-    if (err.response && err.response.data && err.response.data.error) {
-      error.value = err.response.data.error;
-    } else if (err.request) {
-      error.value =
-        "Could not reach the server. Please check the connection or API URL.";
-    } else {
-      error.value = "An unexpected error occurred while sending the request.";
+// Function to handle the URL shortening form submission
+const createShortUrl = async () => {
+    isLoading.value = true;
+    error.value = null;
+    shortUrlResult.value = null;
+    copySuccess.value = false;
+    showQrModal.value = false;
+    qrCodeUrl.value = '';
+    let creationSuccess = false; // <-- 5. Declare creationSuccess flag HERE
+
+    try {
+        const response = await axios.post(
+            `${API_BASE_URL}/urls`,
+            { original_url: originalUrl.value },
+            { withCredentials: true } // Keep this
+        );
+        shortUrlResult.value = response.data;
+        creationSuccess = true; // Mark creation as successful
+
+    } catch (err) {
+        console.error("Error creating short URL:", err);
+        if (err.response && err.response.data && err.response.data.error) {
+            error.value = err.response.data.error;
+        } else if (err.request) {
+            error.value = "Could not reach the server. Please check the connection or API URL.";
+        } else {
+            error.value = "An unexpected error occurred while sending the request.";
+        }
+        shortUrlResult.value = null; // Clear result on error
+
+    } finally {
+        isLoading.value = false;
     }
-  } finally {
-    isLoading.value = false;
-  }
+
+    // --- Refresh history AFTER try/catch, only if creation succeeded ---
+    // Now authStore and urlStore are correctly defined
+    if (creationSuccess && authStore.isLoggedIn) {
+        console.log('>>> STEP 1: UrlShortener requesting history refresh <<<');
+        try {
+            await urlStore.fetchHistory(); // Call store action
+        } catch (fetchErr) {
+            console.error("Error refreshing history after URL creation:", fetchErr);
+            // Handle history refresh error separately if needed
+        }
+    }
 };
 
-// copyToClipboard function (keep this)
+// Function to copy text to the clipboard
 const copyToClipboard = (text) => {
-  if (!navigator.clipboard) {
-    console.warn("Clipboard API not available. Copy functionality limited.");
-    error.value =
-      "Clipboard API not available in this browser or context (requires HTTPS).";
-    return;
-  }
-  navigator.clipboard
-    .writeText(text)
+    if (!navigator.clipboard) {
+        console.warn("Clipboard API not available.");
+        error.value = "Clipboard API not available in this browser or context (requires HTTPS).";
+        return;
+    }
+    navigator.clipboard.writeText(text)
     .then(() => {
-      copySuccess.value = true;
-      setTimeout(() => {
-        copySuccess.value = false;
-      }, 2500);
+        copySuccess.value = true;
+        setTimeout(() => { copySuccess.value = false; }, 2500);
     })
     .catch((err) => {
-      console.error("Failed to copy text: ", err);
-      error.value = "Failed to copy URL to clipboard.";
-      copySuccess.value = false;
+        console.error("Failed to copy text: ", err);
+        error.value = "Failed to copy URL to clipboard.";
+        copySuccess.value = false;
     });
+};
+
+// Function to open the QR Code modal
+const openQrModal = (url) => {
+    if(url && typeof url === 'string'){
+        qrCodeUrl.value = url;
+        showQrModal.value = true;
+    } else {
+        console.error("Cannot open QR modal: Invalid or no URL provided");
+        error.value = "Could not generate QR code for this URL.";
+    }
 };
 </script>
