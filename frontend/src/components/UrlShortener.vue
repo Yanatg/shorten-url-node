@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+  <div class="min-w-[700px] mx-auto p-6 bg-white rounded-lg shadow-lg">
     <h2 class="text-2xl font-semibold text-center mb-6 text-gray-700">
       Create Short URL
     </h2>
@@ -42,7 +42,7 @@
 
       <div class="text-sm">
         <span class="font-medium text-gray-600">Short URL:</span>
-        <div class="flex items-center gap-2 flex-wrap mt-1">
+        <div class="flex items-center justify-center gap-2 flex-wrap mt-1">
           <a
             :href="shortUrlResult.full_short_url"
             target="_blank"
@@ -60,6 +60,7 @@
           </button>
         </div>
       </div>
+
       <div class="text-sm">
         <span class="font-medium text-gray-600">Short Code:</span>
         <span class="text-gray-800 font-mono bg-gray-200 px-1 py-0.5 rounded">{{
@@ -74,79 +75,73 @@
       >
         Copied to clipboard!
       </p>
-    </div>
-  </div>
-</template>
+
+      <div class="mt-4 pt-4 border-t border-gray-200">
+          <span class="font-medium text-gray-600 text-sm">QR Code:</span>
+          <div class="mt-2 flex justify-center">
+              <qrcode-vue
+                  v-if="shortUrlResult.full_short_url" :value="shortUrlResult.full_short_url"
+                  :size="150" level="H" render-as="svg" />
+              <p v-else class="text-xs text-gray-500">Cannot generate QR code.</p>
+          </div>
+      </div>
+      </div> </div> </template>
 
 <script setup>
 import { ref } from "vue";
 import axios from "axios";
+import QrcodeVue from 'qrcode.vue'; // Keep this import
 
-// Reactive variables for component state
+// Reactive variables for component state (keep these)
 const originalUrl = ref("");
 const shortUrlResult = ref(null);
 const isLoading = ref(false);
 const error = ref(null);
 const copySuccess = ref(false);
 
-
+// API Base URL (keep this)
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
 
-// --- Functions ---
-
-// Function to handle the form submission
+// createShortUrl function (keep this)
 const createShortUrl = async () => {
-  // Reset state before making the API call
   isLoading.value = true;
   error.value = null;
   shortUrlResult.value = null;
   copySuccess.value = false;
 
   try {
-    // Make POST request to the backend API endpoint for creating URLs
     const response = await axios.post(`${API_BASE_URL}/urls`, {
-      original_url: originalUrl.value, // Send the URL from the input field
+      original_url: originalUrl.value,
     });
-    // Store the successful response data
     shortUrlResult.value = response.data;
-    // Optionally clear the input field after success, or leave it for user reference
-    // originalUrl.value = '';
   } catch (err) {
-    // Handle errors from the API call
     console.error("Error creating short URL:", err);
-    // Try to extract a meaningful error message from the response
     if (err.response && err.response.data && err.response.data.error) {
-      error.value = err.response.data.error; // Use backend's error message
+      error.value = err.response.data.error;
     } else if (err.request) {
-      // Error: The request was made but no response was received
       error.value =
         "Could not reach the server. Please check the connection or API URL.";
     } else {
-      // Error: Something else happened in setting up the request
       error.value = "An unexpected error occurred while sending the request.";
     }
   } finally {
-    // Ensure loading state is turned off regardless of success or failure
     isLoading.value = false;
   }
 };
 
-// Function to copy the provided text to the user's clipboard
+// copyToClipboard function (keep this)
 const copyToClipboard = (text) => {
-  // Check if Clipboard API is available (requires HTTPS or localhost)
   if (!navigator.clipboard) {
     console.warn("Clipboard API not available. Copy functionality limited.");
     error.value =
       "Clipboard API not available in this browser or context (requires HTTPS).";
     return;
   }
-
-  // Use Clipboard API to write text
   navigator.clipboard
     .writeText(text)
     .then(() => {
-      copySuccess.value = true; 
+      copySuccess.value = true;
       setTimeout(() => {
         copySuccess.value = false;
       }, 2500);
