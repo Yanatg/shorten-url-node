@@ -66,9 +66,4 @@ const handleLogout = async () => {
   await authStore.logout();
   router.push({ name: 'Home' });
 };
-// --- End of existing script setup section ---
 </script>
-
-<style>
-/* Global styles if needed */
-</style>

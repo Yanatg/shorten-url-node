@@ -49,33 +49,28 @@
   
   <script setup>
   import { ref } from 'vue';
-  import { useRouter } from 'vue-router'; // Used for navigation after login
-  import { useAuthStore } from '../stores/auth'; // Import the auth store
+  import { useRouter } from 'vue-router';
+  import { useAuthStore } from '../stores/auth';
   
   const router = useRouter();
   const authStore = useAuthStore();
   
-  // Reactive refs for form fields and component state
   const email = ref('');
   const password = ref('');
-  const error = ref(null); // To store login error messages
-  const isLoading = ref(false); // To disable button during login attempt
-  
-  // Function to handle form submission
+  const error = ref(null);
+  const isLoading = ref(false);
+
   const handleLogin = async () => {
     isLoading.value = true;
-    error.value = null; // Clear previous errors
+    error.value = null;
   
-    // Call the login action from the auth store
     const result = await authStore.login(email.value, password.value);
   
-    isLoading.value = false; // Reset loading state
-  
+    isLoading.value = false;
+
     if (result.success) {
-      // On successful login, redirect to the Home page
       router.push({ name: 'Home' });
     } else {
-      // If login failed, display the error message from the store action
       error.value = result.error || 'An unknown error occurred during login.';
     }
   };

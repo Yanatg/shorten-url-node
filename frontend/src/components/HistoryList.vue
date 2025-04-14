@@ -133,51 +133,32 @@
 </template>
 
 <script setup>
-// Added computed
 import { ref, onMounted, watch, computed } from "vue";
-import axios from 'axios'; // <-- ***** ADD THIS LINE BACK *****
-// Removed axios import - store handles it // You can remove this comment now
+import axios from 'axios';
 import { useAuthStore } from "../stores/auth";
 import { useUrlStore } from "../stores/url";
 import QrCodeModal from "./QrCodeModal.vue";
 
-// This line needs the 'axios' import from above
 const apiClient = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
     withCredentials: true
 });
 
 const authStore = useAuthStore();
-const urlStore = useUrlStore(); // <-- Get URL store instance
+const urlStore = useUrlStore();
 
-// --- Removed local state for history, isLoading, error ---
-// const history = ref([]);
-// const isLoading = ref(false);
-// const error = ref(null);
-
-// --- Local state only for QR Modal ---
 const showQrModal = ref(false);
 const qrCodeUrl = ref("");
 
-// --- Debugging Computed Property ---
 const historyForLoop = computed(() => {
-  // This log runs whenever Vue re-evaluates dependencies for the template's v-for
   console.log(
     `>>> STEP 4: HistoryList computed running. Store history length: ${
       urlStore.history?.length ?? "undefined"
     }`
   );
-  // Return the history array from the store
   return urlStore.history;
 });
-// --- End Debugging Computed Property ---
 
-// --- Removed local fetchHistory function ---
-// const fetchHistory = async () => { ... }
-
-// --- Methods ---
-
-// Helper functions remain the same
 const getFullShortUrl = (shortCode) => {
   const redirectBase =
     import.meta.env.VITE_APP_BASE_REDIRECT_URL || "http://localhost:3000";
@@ -210,53 +191,41 @@ const openQrModal = (url) => {
     console.error(
       "Cannot open QR modal: Invalid or no URL provided for history item"
     );
-    // Potentially set a user-visible error, but avoid using the removed local 'error' ref
-  }
+}
 };
 
-// --- **** ADD DELETE HANDLER **** ---
 const handleDelete = async (urlId) => {
   if (!urlId) return;
 
-  // Confirm before deleting
   if (!confirm("Are you sure you want to permanently delete this short URL?")) {
     return;
   }
 
   console.log(`Attempting to delete URL ID: ${urlId}`);
   try {
-    // Call the backend DELETE endpoint
-    await apiClient.delete(`/urls/${urlId}`); // Use the configured apiClient
+    await apiClient.delete(`/urls/${urlId}`);
 
     console.log(`Successfully requested deletion for URL ID: ${urlId}`);
 
-    // Refresh the history list to show the item removed
-    // Calling the store action is the easiest way
     await urlStore.fetchHistory();
   } catch (err) {
     console.error(`Error deleting URL ID ${urlId}:`, err);
-    // Display error to user (could use a toast notification or set an error ref)
     const errorMessage =
       err.response?.data?.error ||
       "Failed to delete the URL. Please try again.";
-    alert(`Error: ${errorMessage}`); // Simple alert for now
-    // Optionally check if error was 401 and trigger logout?
-    // if (err.response?.status === 401) { authStore.logout(); router.push('/login'); }
-  }
+    alert(`Error: ${errorMessage}`);
+}
 };
 
-// --- Lifecycle Hooks & Watchers ---
-
-// Use urlStore.fetchHistory
 onMounted(() => {
   if (authStore.initialCheckDone) {
-    urlStore.fetchHistory(); // Use store action
+    urlStore.fetchHistory();
   } else {
     const unwatch = watch(
       () => authStore.initialCheckDone,
       (isDone) => {
         if (isDone) {
-          urlStore.fetchHistory(); // Use store action
+          urlStore.fetchHistory();
           unwatch();
         }
       }
@@ -264,17 +233,10 @@ onMounted(() => {
   }
 });
 
-// Use urlStore.fetchHistory
 watch(
   () => authStore.isLoggedIn,
   (loggedIn) => {
-    // Fetch history via store action on login/logout
-    // The store action itself handles clearing history if logged out
     urlStore.fetchHistory();
   }
 );
 </script>
-
-<style scoped>
-/* Scoped styles if needed */
-</style>

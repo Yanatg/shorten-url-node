@@ -8,7 +8,7 @@
 
 <script setup>
 import UrlShortener from '../components/UrlShortener.vue';
-import HistoryList from '../components/HistoryList.vue'; // Make sure import is correct
+import HistoryList from '../components/HistoryList.vue';
 import { useAuthStore } from '../stores/auth';
 
 const authStore = useAuthStore();

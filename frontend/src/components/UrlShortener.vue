@@ -87,12 +87,10 @@
 <script setup>
 import { ref } from "vue";
 import axios from "axios";
-import QrcodeVue from 'qrcode.vue'; // Keep this (needed by modal)
 import QrCodeModal from './QrCodeModal.vue';
-import { useUrlStore } from '../stores/url'; // <-- 1. IMPORT URL STORE
-import { useAuthStore } from '../stores/auth'; // <-- 2. IMPORT AUTH STORE
+import { useUrlStore } from '../stores/url';
+import { useAuthStore } from '../stores/auth';
 
-// --- State Variables ---
 const originalUrl = ref("");
 const shortUrlResult = ref(null);
 const isLoading = ref(false);
@@ -100,18 +98,13 @@ const error = ref(null);
 const copySuccess = ref(false);
 const showQrModal = ref(false);
 const qrCodeUrl = ref('');
+const urlStore = useUrlStore();
+const authStore = useAuthStore();
 
-// --- Store Instances ---
-const urlStore = useUrlStore(); // <-- 3. USE URL STORE
-const authStore = useAuthStore(); // <-- 4. USE AUTH STORE
-
-// API Base URL
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
 
-// --- Methods ---
 
-// Function to handle the URL shortening form submission
 const createShortUrl = async () => {
     isLoading.value = true;
     error.value = null;
@@ -119,16 +112,16 @@ const createShortUrl = async () => {
     copySuccess.value = false;
     showQrModal.value = false;
     qrCodeUrl.value = '';
-    let creationSuccess = false; // <-- 5. Declare creationSuccess flag HERE
+    let creationSuccess = false;
 
     try {
         const response = await axios.post(
             `${API_BASE_URL}/urls`,
             { original_url: originalUrl.value },
-            { withCredentials: true } // Keep this
+            { withCredentials: true }
         );
         shortUrlResult.value = response.data;
-        creationSuccess = true; // Mark creation as successful
+        creationSuccess = true;
 
     } catch (err) {
         console.error("Error creating short URL:", err);
@@ -139,26 +132,22 @@ const createShortUrl = async () => {
         } else {
             error.value = "An unexpected error occurred while sending the request.";
         }
-        shortUrlResult.value = null; // Clear result on error
+        shortUrlResult.value = null;
 
     } finally {
         isLoading.value = false;
     }
 
-    // --- Refresh history AFTER try/catch, only if creation succeeded ---
-    // Now authStore and urlStore are correctly defined
     if (creationSuccess && authStore.isLoggedIn) {
         console.log('>>> STEP 1: UrlShortener requesting history refresh <<<');
         try {
-            await urlStore.fetchHistory(); // Call store action
+            await urlStore.fetchHistory();
         } catch (fetchErr) {
             console.error("Error refreshing history after URL creation:", fetchErr);
-            // Handle history refresh error separately if needed
         }
     }
 };
 
-// Function to copy text to the clipboard
 const copyToClipboard = (text) => {
     if (!navigator.clipboard) {
         console.warn("Clipboard API not available.");
@@ -177,7 +166,6 @@ const copyToClipboard = (text) => {
     });
 };
 
-// Function to open the QR Code modal
 const openQrModal = (url) => {
     if(url && typeof url === 'string'){
         qrCodeUrl.value = url;
